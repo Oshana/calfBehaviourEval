@@ -23,7 +23,11 @@ def calculate_ODBA(dinamic_x, dinamic_y, dinamic_z):
 '''(see illustration https://howthingsfly.si.edu/flight-dynamics/roll-pitch-and-yaw)
     X = Side to Side - Z (our case)
     Y = Front to back - Y (our case)
-    Z = Top to Bottom - X (our case)'''
+    Z = Top to Bottom - X (our case)
+    
+    A similar implementation can be found at:
+    https://engineering.stackexchange.com/questions/3348/calculating-pitch-yaw-and-roll-from-mag-acc-and-gyro-data
+    '''
 
 # calculate the pitch of a movement based on X,Y,Z axes readings
 def calculate_pitch(static_x, static_y, static_z):
@@ -93,8 +97,17 @@ def find_optimal_calf_combinations_for_split(all_calves, num_to_select, data_amo
     for combination in all_calf_combinations:
         test_counts = data_amounts_df[data_amounts_df.calf_id.isin(combination)].sum().values[1:]
         train_counts = data_amounts_df[~data_amounts_df.calf_id.isin(combination)].sum().values[1:]
+        
+        # identifying labels with zeor data points in the test set
+        mask = np.array(test_counts) != 0
 
-        train_test_label_ratios = np.array(train_counts) / np.array(test_counts)
+        # filtering out the labels with zeor label counts in the test set
+        filtered_train_counts = np.array(train_counts)[mask]
+
+         # filtering out the labels with zeor label counts
+        filtered_test_counts = np.array(test_counts)[mask]
+
+        train_test_label_ratios = np.array(filtered_train_counts) / np.array(filtered_test_counts)
 
         deviation = np.abs(train_test_label_ratios - train_test_ratio)
 
